@@ -1,5 +1,6 @@
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.util.regex.Pattern
 
 /*
  * Created by johntsai on 2019-08-31
@@ -31,8 +32,23 @@ fun WeiboUser.transformToContainerId(): String {
         }
     }
 
+    if (this.name.isNotEmpty()) {
+        val url = "https://weibo.cn/${this.name}"
+        val client = OkHttpClient()
 
-
+        val request = Request.Builder()
+            .addHeader("User-Agent", Constant.UserAgent)
+            .url(url)
+            .build()
+        val response = client.newCall(request).execute()
+        val html = response.body?.string()
+        if (html?.isNotEmpty()!!) {
+            val pattern = Pattern.compile("href=\"/([\\d]*?)/info\"")
+            val matcher = pattern.matcher(html)
+            while (matcher.find()) {
+                return "107603${matcher.group(1)}"
+            }
+        }
+    }
     return ""
-
 }

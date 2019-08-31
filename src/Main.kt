@@ -45,6 +45,8 @@ fun main() {
         }
     }
 
+    scanner.close()
+
     val containerId = user.transformToContainerId()
     user.containerId = containerId
 
