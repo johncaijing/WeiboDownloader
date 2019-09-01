@@ -38,7 +38,7 @@ class NetworkManager {
         return result
     }
 
-    fun inputStreamToByteArray(inputStream: InputStream): ByteArray {
+    private fun inputStreamToByteArray(inputStream: InputStream): ByteArray {
         val baos = ByteArrayOutputStream()
         val buffer = ByteArray(1024)
         var len: Int

@@ -27,9 +27,11 @@ fun WeiboUser.transformToContainerId(): String {
         val response = client.newCall(request).execute()
         if (response.code == 302) {
             val location = response.header("Location", "")!!
+            response.body?.close()
             return if (location.isNotEmpty() && location.length > 27) "107603${location.substring(27)}" else ""
+        } else {
+            response.body?.close()
         }
-        response.body?.close()
     }
 
     if (this.name.isNotEmpty()) {
