@@ -11,8 +11,8 @@ import java.io.InputStream
 class NetworkManager {
 
     private val okHttpClient: OkHttpClient = OkHttpClient().newBuilder()
-        .connectTimeout(5000, TimeUnit.MILLISECONDS)
-        .readTimeout(5000, TimeUnit.MILLISECONDS)
+        .connectTimeout(10000, TimeUnit.MILLISECONDS)
+        .readTimeout(10000, TimeUnit.MILLISECONDS)
         .build()
 
     companion object {

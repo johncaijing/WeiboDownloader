@@ -8,9 +8,9 @@ import java.util.concurrent.Executors
  */
 class WeiboDownloader(val user: WeiboUser, val path: String) : IWeiboDownloader {
 
-    override fun analyseWeiboUrls(type: WeiboType): List<String> {
+    override fun analyseWeiboUrls(type: WeiboType): List<WeiboInfo> {
 
-        val result = ArrayList<String>()
+        val result = ArrayList<WeiboInfo>()
         var page = 1
         println("analysing weibo")
         while (true) {
@@ -29,7 +29,7 @@ class WeiboDownloader(val user: WeiboUser, val path: String) : IWeiboDownloader 
         return result
     }
 
-    private fun getUrls(page: Int, type: WeiboType): List<String> {
+    private fun getUrls(page: Int, type: WeiboType): List<WeiboInfo> {
 
         val url = "https://m.weibo.cn/api/container/getIndex?count=25&page=$page&containerid=${this.user.containerId}"
 
@@ -55,30 +55,32 @@ class WeiboDownloader(val user: WeiboUser, val path: String) : IWeiboDownloader 
 
             }
         }
-        response.close()
-        return transformMBlogToUrl(type, mBlogs)
+        response.body?.close()
+        return transformMBlogToUrl(mBlogs)
     }
 
-    private fun transformMBlogToUrl(type: WeiboType, mBlogs: List<JSONObject>): List<String> {
-        val result = ArrayList<String>()
-        when (type) {
-            WeiboType.IMAGE -> {
-                mBlogs.forEach {
-                    if (it.has("pics")) {
-                        val pics = it.optJSONArray("pics")
-                        pics?.forEach { pic ->
-                            if (pic is JSONObject && pic.has("large")) {
-                                val large = pic.optJSONObject("large")
-                                if (large != null && large.has("url")) {
-                                    result.add(large.getString("url"))
-                                }
-                            }
+    private fun transformMBlogToUrl(mBlogs: List<JSONObject>): List<WeiboInfo> {
+        val result = ArrayList<WeiboInfo>()
+        mBlogs.forEach {
+            if (it.has("pics")) {
+                val pics = it.optJSONArray("pics")
+                pics?.forEach { pic ->
+                    if (pic is JSONObject && pic.has("large")) {
+                        val large = pic.optJSONObject("large")
+                        if (large != null && large.has("url")) {
+                            result.add(WeiboInfo(WeiboType.IMAGE, large.getString("url")))
                         }
                     }
                 }
-            }
-            else -> {
-                return emptyList()
+            } else if (it.has("page_info")) {
+                val pageInfo = it.optJSONObject("page_info")
+                val mediaInfo = pageInfo.optJSONObject("media_info")
+                if (mediaInfo != null) {
+                    val mp4Url = mediaInfo.optString("mp4_720p_mp4")
+                    if (!mp4Url.isNullOrEmpty()) {
+                        result.add(WeiboInfo(WeiboType.VIDEO, mp4Url))
+                    }
+                }
             }
         }
         return result

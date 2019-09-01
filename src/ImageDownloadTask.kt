@@ -6,13 +6,18 @@ import java.util.concurrent.CountDownLatch
 /*
  * Created by johntsai on 2019-09-01
  */
-class ImageDownloadTask(val url: String, val path: String, val name: String, val downLatch: CountDownLatch) : Runnable {
+class ImageDownloadTask(val info: WeiboInfo, val path: String, val name: String, val downLatch: CountDownLatch) : Runnable {
 
     override fun run() {
         try {
-            val byteArray = NetworkManager.instance.downloadFile(url)
-            val suffix = url.getSuffix(".")
-            val fileFullName = if (suffix.isEmpty()) "$name.jpg" else "$name$suffix"
+            val byteArray = NetworkManager.instance.downloadFile(info.url)
+            var fileFullName = ""
+            if(info.type == WeiboType.IMAGE) {
+                val suffix = info.url.getSuffix(".")
+                fileFullName = if (suffix.isEmpty()) "$name.jpg" else "$name$suffix"
+            } else if(info.type == WeiboType.VIDEO) {
+                fileFullName = "$name.mp4"
+            }
             val file = File(path, fileFullName)
             val sink = file.sink().buffer()
             if(byteArray != null) {

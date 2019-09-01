@@ -3,7 +3,7 @@
  */
 interface IWeiboDownloader {
 
-    fun analyseWeiboUrls(type: WeiboType): List<String>
+    fun analyseWeiboUrls(type: WeiboType): List<WeiboInfo>
 
     fun download(type: WeiboType = WeiboType.IMAGE)
 
