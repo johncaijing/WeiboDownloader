@@ -1,4 +1,3 @@
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.regex.Pattern
 
@@ -17,7 +16,7 @@ fun WeiboUser.transformToContainerId(): String {
     if (this.nickName.isNotEmpty()) {
 
         val path = "http://m.weibo.com/n/${this.nickName}"
-        val client = OkHttpClient().newBuilder()
+        val client = NetworkManager.instance.getClient().newBuilder()
             .followRedirects(false)
             .followSslRedirects(false).build()
         val request = Request.Builder()
@@ -30,12 +29,13 @@ fun WeiboUser.transformToContainerId(): String {
             val location = response.header("Location", "")!!
             return if (location.isNotEmpty() && location.length > 27) "107603${location.substring(27)}" else ""
         }
+        response.body?.close()
     }
 
     if (this.name.isNotEmpty()) {
         //FIXME 这个请求获取不到containerId
         val url = "https://weibo.cn/${this.name}"
-        val client = OkHttpClient()
+        val client = NetworkManager.instance.getClient()
 
         val request = Request.Builder()
             .addHeader("User-Agent", Constant.UserAgent)
@@ -50,6 +50,13 @@ fun WeiboUser.transformToContainerId(): String {
                 return "107603${matcher.group(1)}"
             }
         }
+        response.body?.close()
     }
     return ""
+}
+
+
+fun String.getSuffix(separator: String): String {
+    val index = lastIndexOf(separator)
+    return if(index == -1) "" else substring(index)
 }

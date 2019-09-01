@@ -1,3 +1,4 @@
+import java.io.File
 import java.util.*
 
 /*
@@ -49,6 +50,18 @@ fun main() {
 
     val containerId = user.transformToContainerId()
     user.containerId = containerId
+
+    try {
+        path = "$path${File.separator}${user.containerId}${File.separator}"
+        val file = File(path)
+        if (!file.exists()) {
+            file.mkdirs()
+        }
+    } catch (e: Exception) {
+        println("create download file dir failed: ${e.message}")
+        return
+    }
+
 
     val downloader = WeiboDownloader(user, path)
     downloader.download()

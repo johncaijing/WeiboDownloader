@@ -1,20 +1,12 @@
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 
 /*
  * Created by johntsai on 2019-08-31
  */
 class WeiboDownloader(val user: WeiboUser, val path: String) : IWeiboDownloader {
-
-    private var okhttpClient: OkHttpClient? = null
-
-    init {
-        okhttpClient = OkHttpClient().newBuilder()
-            .connectTimeout(3000, TimeUnit.MILLISECONDS)
-            .build()
-    }
 
     override fun analyseWeiboUrls(type: WeiboType): List<String> {
 
@@ -26,9 +18,10 @@ class WeiboDownloader(val user: WeiboUser, val path: String) : IWeiboDownloader 
             if (urls.isEmpty()) {
                 break
             } else {
-                result.addAll(urls)
-                page++
                 Thread.sleep(1000)
+                result.addAll(urls)
+                Thread.sleep(1000)
+                page++
                 print("......")
             }
         }
@@ -42,10 +35,10 @@ class WeiboDownloader(val user: WeiboUser, val path: String) : IWeiboDownloader 
 
         val request = Request.Builder().url(url).header("User-Agent", Constant.UserAgent).build()
 
-        val response = okhttpClient?.newCall(request)?.execute()
+        val response = NetworkManager.instance.getClient().newCall(request).execute()
 
-        if (response != null) {
-            val mBlogs = ArrayList<JSONObject>()
+        val mBlogs = ArrayList<JSONObject>()
+        if (response.code == 200) {
             val responseStr = response.body?.string()
             val jsonObject = JSONObject(responseStr)
             if (jsonObject.has("data")) {
@@ -61,10 +54,9 @@ class WeiboDownloader(val user: WeiboUser, val path: String) : IWeiboDownloader 
                 }
 
             }
-            return transformMBlogToUrl(type, mBlogs)
         }
-        return emptyList()
-
+        response.close()
+        return transformMBlogToUrl(type, mBlogs)
     }
 
     private fun transformMBlogToUrl(type: WeiboType, mBlogs: List<JSONObject>): List<String> {
@@ -99,6 +91,17 @@ class WeiboDownloader(val user: WeiboUser, val path: String) : IWeiboDownloader 
         val urls = analyseWeiboUrls(type)
 
         println("The size of files: ${urls.size}")
+
+        val executorService = Executors.newFixedThreadPool(8)
+
+        val downLatch = CountDownLatch(urls.size);
+
+        urls.forEachIndexed { index, s ->
+            executorService.submit(ImageDownloadTask(s, path, index.toString(), downLatch))
+        }
+
+        downLatch.await()
+        executorService.shutdown()
 
 
     }
