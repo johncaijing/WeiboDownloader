@@ -33,6 +33,7 @@ fun WeiboUser.transformToContainerId(): String {
     }
 
     if (this.name.isNotEmpty()) {
+        //FIXME 这个请求获取不到containerId
         val url = "https://weibo.cn/${this.name}"
         val client = OkHttpClient()
 

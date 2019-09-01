@@ -50,7 +50,7 @@ fun main() {
     val containerId = user.transformToContainerId()
     user.containerId = containerId
 
-    val downloader = WeiboDownloader(user)
+    val downloader = WeiboDownloader(user, path)
     downloader.download()
 
 }
