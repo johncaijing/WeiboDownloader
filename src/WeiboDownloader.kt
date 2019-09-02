@@ -20,7 +20,6 @@ class WeiboDownloader(val user: WeiboUser, val path: String) : IWeiboDownloader 
             } else {
                 Thread.sleep(1000)
                 result.addAll(urls)
-                Thread.sleep(1000)
                 page++
                 print("......")
             }

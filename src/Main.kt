@@ -18,7 +18,7 @@ fun main() {
     PropertiesManager.instance.release()
 
     println("Please input the weibo user's info:")
-    println("1:User Id")
+    println("1:User Id(Or the user's weibo home url)")
     println("2:User name")
     println("3:User nickname")
 
@@ -34,7 +34,12 @@ fun main() {
     when (input) {
         1 -> {
             println("User Id:")
-            user.id = scanner.next().trim()
+            val input = scanner.next().trim()
+            if (input.startsWith("https://weibo.com/u/")) {
+                user.id = input.substring(input.lastIndexOf("/") + 1).trim()
+            } else {
+                user.id = input
+            }
         }
         2 -> {
             println("User name:")
