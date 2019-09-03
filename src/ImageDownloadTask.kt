@@ -25,7 +25,7 @@ class ImageDownloadTask(val info: WeiboInfo, val path: String, val name: String,
             }
 
         } catch (e: Exception) {
-            println("$name download failed: ${e.message}")
+            println("$name download failed: $e")
         } finally {
             downLatch.countDown()
         }
