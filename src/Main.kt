@@ -69,6 +69,6 @@ fun main() {
 
 
     val downloader = WeiboDownloader(user, path)
-    downloader.download()
+    downloader.download(WeiboType.IMAGE)
 
 }
