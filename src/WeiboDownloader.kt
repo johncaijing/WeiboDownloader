@@ -6,10 +6,8 @@ import java.util.concurrent.Executors
 /*
  * Created by johntsai on 2019-08-31
  */
-class WeiboDownloader(val user: WeiboUser, val path: String) : IWeiboDownloader {
-
-    override fun analyseWeiboUrls(type: WeiboType): List<WeiboInfo> {
-
+class WeiboDownloader(val user: WeiboUser, val path: String) : IDownloader<WeiboType, WeiboInfo> {
+    override fun analyseUrls(type: WeiboType): List<WeiboInfo> {
         val result = ArrayList<WeiboInfo>()
         var page = 1
         println("analysing weibo")
@@ -89,7 +87,7 @@ class WeiboDownloader(val user: WeiboUser, val path: String) : IWeiboDownloader 
         if (this.user.containerId.isEmpty()) {
             return
         }
-        val urls = analyseWeiboUrls(type)
+        val urls = analyseUrls(type)
 
         println("The size of files: ${urls.size}")
 
